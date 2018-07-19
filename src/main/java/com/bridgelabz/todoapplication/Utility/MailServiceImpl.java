@@ -1,5 +1,4 @@
-package com.bridgelabz.todoapplication.userservice.service;
-
+package com.bridgelabz.todoapplication.Utility;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
@@ -15,14 +14,14 @@ public class MailServiceImpl implements MailService{
 	@Autowired
 	private JavaMailSender javaMailSender;
 	
-	public void sendMail(Mail mail) throws MessagingException {
+	public void sendMail(String subject,String body,String to ) throws MessagingException {
 		
 		MimeMessage message = javaMailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);
 		
-		helper.setSubject(mail.getSubject());
-		helper.setTo(mail.getTo());
-		helper.setText(mail.getBody());
+		helper.setSubject(subject);
+		helper.setTo(to);
+		helper.setText(body);
 		
 		javaMailSender.send(message);
 	}

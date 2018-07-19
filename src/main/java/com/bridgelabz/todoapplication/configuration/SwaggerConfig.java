@@ -36,8 +36,8 @@ public class SwaggerConfig {
 	}
 
 	private ApiInfo apiInfo() {
-		return new ApiInfoBuilder().title("JavaInUse API").description("JavaInUse API reference for developers")
-				.termsOfServiceUrl("http://javainuse.com").contact("javainuse@gmail.com").license("JavaInUse License")
-				.licenseUrl("javainuse@gmail.com").version("1.0").build();
+		return new ApiInfoBuilder().title("ToDo Api").description("ToDo Application API reference for developers")
+				.termsOfServiceUrl("http://javainuse.com").contact("sameersaurabh9314@gmail.com").license("Sameer License")
+				.licenseUrl("sameersaurabh9314@gmail.com").version("1.0").build();
 	}
 }

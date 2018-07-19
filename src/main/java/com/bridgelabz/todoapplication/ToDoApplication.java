@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 /**
- * Purpose : Main Class for String Rest logic.	
+ * Purpose : Main Class  to run ToDo Application.	
  * @author   Sameer Saurabh
  * @version  1.0
  * @Since    11/07/2018

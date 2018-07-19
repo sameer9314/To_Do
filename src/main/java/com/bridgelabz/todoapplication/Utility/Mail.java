@@ -1,10 +1,15 @@
-package com.bridgelabz.todoapplication.userservice.service;
+package com.bridgelabz.todoapplication.Utility;
+
+import java.io.Serializable;
 
 import org.springframework.stereotype.Service;
 
 @Service
-public class Mail {
+public class Mail implements Serializable{
 
+	
+	private static final long serialVersionUID = 1L;
+	
 	private String to;
 	private String subject;
 	private String body;
@@ -35,5 +40,10 @@ public class Mail {
 
 	public void setBody(String body) {
 		this.body = body;
+	}
+	
+	@Override
+	public String toString() {
+		return "Mail [to=" + to + ", subject=" + subject + ", body=" + body + "]";
 	}
 }

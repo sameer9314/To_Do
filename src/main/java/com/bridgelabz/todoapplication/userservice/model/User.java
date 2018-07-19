@@ -1,8 +1,12 @@
 package com.bridgelabz.todoapplication.userservice.model;
 
+import java.io.Serializable;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Service;
+
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Purpose : POJO Class for User.
@@ -13,16 +17,18 @@ import org.springframework.stereotype.Service;
  */
 @Document(collection = "user_detail")
 @Service
-public class User {
+public class User implements Serializable{
 	
-	
+	private static final long serialVersionUID = 1L;
 	@Id
+	@ApiModelProperty(hidden=true)
 	String id;
 	String userName;
 	String email;
 	String phoneNumber;
 	String password;
-	String status = "false";
+	@ApiModelProperty(hidden=true)
+	String status;
 
 	public User() {
 		super();

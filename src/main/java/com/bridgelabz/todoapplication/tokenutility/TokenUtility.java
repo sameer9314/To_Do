@@ -34,7 +34,7 @@ public class TokenUtility {
 	@SuppressWarnings("unused")
 	public String generator(User user) {
 		String email = user.getEmail();
-		String passkey = user.getPassword();
+		String passkey = user.getId();
 		long time = System.currentTimeMillis();
 		long nowMillis = System.currentTimeMillis() + (20 * 60 * 60 * 1000);
 		Date now = new Date(nowMillis);
@@ -49,11 +49,10 @@ public class TokenUtility {
 	 * @param jwt
 	 * @return String
 	 */
-	public String parseJWT(String jwt) {
+	public Claims parseJWT(String jwt) {
 
 		Claims claims = Jwts.parser().setSigningKey(DatatypeConverter.parseBase64Binary(KEY)).parseClaimsJws(jwt)
 				.getBody();
-		System.out.println("User email id is : " + claims.getSubject());
-		return claims.getSubject();
+		return claims;
 	}
 }
