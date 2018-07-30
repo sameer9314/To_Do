@@ -6,52 +6,68 @@ import java.util.List;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Service;
 
-import io.swagger.annotations.ApiModelProperty;
-
+/**
+ * Purpose : POSO class of Notes.
+ * 	
+ * @author   Sameer Saurabh
+ * @version  1.0
+ * @Since    24/08/2018
+ */
 @Document(collection = "notes")
 @Service
 public class Notes implements Serializable {
-
 	private static final long serialVersionUID = 1L;
 	
-	private Integer id;
+	private String id;
 	private String title;
 	private String description;
-	@ApiModelProperty(hidden = true)
+	
 	private String creationDate;
-	@ApiModelProperty(hidden = true)
 	private String userId;
-	@ApiModelProperty(hidden = true)
 	private String lastModified;
 	
-	private String archive;
-	private List<String> label;
-	private String pinned;
+	private boolean archive;
+	private boolean pinned;
+	private boolean trash;
 	
-	public String getPinned() {
-		return pinned;
-	}
+	//@DBRef
+	//@Field("label")
+	private List<Label> label;
+		
 
-	public void setPinned(String pinned) {
-		this.pinned = pinned;
-	}
-
-	public String getArchive() {
+	public boolean isArchive() {
 		return archive;
 	}
 
-	public void setArchive(String archive) {
+	public void setArchive(boolean archive) {
 		this.archive = archive;
 	}
 
-//	public String getLabel() {
-//		return label;
-//	}
-//
-//	public void setLabel(String label) {
-//		this.label = label;
-//	}
+	public boolean isPinned() {
+		return pinned;
+	}
+
+	public void setPinned(boolean pinned) {
+		this.pinned = pinned;
+	}
+
+	public boolean isTrash() {
+		return trash;
+	}
+
+	public void setTrash(boolean trash) {
+		this.trash = trash;
+	}
+
+	public List<Label> getLabel() {
+		return label;
+	}
+
+	public void setLabel(List<Label> label) {
+		this.label = label;
+	}
 	
+
 	public Notes() {
 		super();
 	}
@@ -64,11 +80,11 @@ public class Notes implements Serializable {
 		this.lastModified = lastModified;
 	}
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -108,10 +124,8 @@ public class Notes implements Serializable {
 	public String toString() {
 		return "Notes [id=" + id + ", title=" + title + ", description=" + description + ", creationDate="
 				+ creationDate + ", userId=" + userId + ", lastModified=" + lastModified + ", archive=" + archive
-				+ ", label=" + label + ", pinned=" + pinned + "]";
+				+ ", pinned=" + pinned + ", trash=" + trash + ", label=" + label + "]";
 	}
-
-	
 
 	
 }

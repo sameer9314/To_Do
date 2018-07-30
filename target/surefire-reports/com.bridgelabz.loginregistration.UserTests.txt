@@ -1,0 +1,30 @@
+-------------------------------------------------------------------------------
+Test set: com.bridgelabz.loginregistration.UserTests
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 6, Errors: 0, Skipped: 0, Time elapsed: 4.163 s <<< FAILURE! - in com.bridgelabz.loginregistration.UserTests
+registerationTest(com.bridgelabz.loginregistration.UserTests)  Time elapsed: 0.156 s  <<< FAILURE!
+java.lang.AssertionError: JSON path "$.message" expected:<Mail sent to the user with email " + user.getEmail()> but was:<Phone Number Cannot Be Null>
+	at com.bridgelabz.loginregistration.UserTests.registerationTest(UserTests.java:90)
+
+loginTest(com.bridgelabz.loginregistration.UserTests)  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: JSON path "$.message" expected:<Welcome sameersaurabh9314@gmail.com> but was:<No message found under code 'hello' for locale 'en'.>
+	at com.bridgelabz.loginregistration.UserTests.loginTest(UserTests.java:40)
+
+loginEmailNullTest(com.bridgelabz.loginregistration.UserTests)  Time elapsed: 0.006 s  <<< FAILURE!
+java.lang.AssertionError: JSON path "$.message" expected:<Email cannot be Null> but was:<No message found under code 'hello' for locale 'en'.>
+	at com.bridgelabz.loginregistration.UserTests.loginEmailNullTest(UserTests.java:70)
+
+loginEmailEmptyStringTest(com.bridgelabz.loginregistration.UserTests)  Time elapsed: 0.006 s  <<< FAILURE!
+java.lang.AssertionError: JSON path "$.message" expected:<Email and password cannot be null> but was:<No message found under code 'hello' for locale 'en'.>
+	at com.bridgelabz.loginregistration.UserTests.loginEmailEmptyStringTest(UserTests.java:51)
+
+loginPasswordEmptyStringTest(com.bridgelabz.loginregistration.UserTests)  Time elapsed: 0.006 s  <<< FAILURE!
+java.lang.AssertionError: JSON path "$.message" expected:<Email and password cannot be null> but was:<No message found under code 'hello' for locale 'en'.>
+	at com.bridgelabz.loginregistration.UserTests.loginPasswordEmptyStringTest(UserTests.java:61)
+
+loginPasswordNullTest(com.bridgelabz.loginregistration.UserTests)  Time elapsed: 0.006 s  <<< FAILURE!
+java.lang.AssertionError: 
+JSON path "$.message" expected:<Password Cannot be null> but was:<JSON parse error: Unexpected character ('"' (code 34)): was expecting comma to separate Object entries; nested exception is com.fasterxml.jackson.core.JsonParseException: Unexpected character ('"' (code 34)): was expecting comma to separate Object entries
+ at [Source: (PushbackInputStream); line: 1, column: 42]>
+	at com.bridgelabz.loginregistration.UserTests.loginPasswordNullTest(UserTests.java:80)
+

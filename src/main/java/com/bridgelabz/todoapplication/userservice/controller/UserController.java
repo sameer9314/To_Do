@@ -10,16 +10,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bridgelabz.todoapplication.Utility.Messages;
 import com.bridgelabz.todoapplication.userservice.model.LoginDTO;
 import com.bridgelabz.todoapplication.userservice.model.Response;
 import com.bridgelabz.todoapplication.userservice.model.User;
+import com.bridgelabz.todoapplication.userservice.model.UserDto;
 import com.bridgelabz.todoapplication.userservice.service.UserServiceImpl;
+import com.google.common.base.Preconditions;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -38,6 +41,12 @@ public class UserController {
 
 	private final Logger logger = LoggerFactory.getLogger(UserController.class);
 	
+	@Autowired
+	Response response;
+	@Autowired
+	Messages messages;
+	
+	
 	final String REQ_IN="REQ_IN";
 	final String RES_OUT="RES_OUT";
 	
@@ -47,9 +56,9 @@ public class UserController {
 	 * @return List<Users>
 	 */
 	@ApiOperation(value = "Get all user details")
-	@RequestMapping(value = "/users", method = RequestMethod.GET)
+	@GetMapping(value="/users")
 	public List<User> getUserDetails() {
-		logger.info(REQ_IN+" Get User Details Starts");
+		logger.info(REQ_IN+" "+messages.get("101"));
 		return userService.getUserDetails();
 	}
 
@@ -61,16 +70,13 @@ public class UserController {
 	 * @throws Exception
 	 */
 	@ApiOperation(value = "New User Sign Up")
-	@RequestMapping(value = "/signup", method = RequestMethod.POST)
-	public ResponseEntity<Response> signUp(@RequestBody User user, HttpServletResponse res) {
+	@PostMapping("/signup")
+	public ResponseEntity<Response> signUp(@RequestBody UserDto user) throws Exception {
 		logger.info(REQ_IN+" Sign Up Starts");
-		Response response=new Response();
-		try{userService.signUp(user);
-		}catch(Exception e) {
-			response.setMessage(e+"");
-			response.setStatus(-1);
-			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-		}
+		Preconditions.checkNotNull(user, "Field Cannot Be Null");
+		
+		userService.signUp(user);
+		
 		response.setMessage("Mail sent to the user with email " + user.getEmail());
 		response.setStatus(1);
 		logger.info(RES_OUT+" Sign Up ends");
@@ -88,21 +94,19 @@ public class UserController {
 	 * @throws Exception
 	 */
 	@ApiOperation(value = "Resgistered User Log In")
-	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public ResponseEntity<Response> logIn(@RequestBody LoginDTO user, HttpServletResponse res) {
+	@PostMapping("/login")
+	public ResponseEntity<Response> logIn(@RequestBody LoginDTO user, HttpServletResponse res) throws Exception {
 		logger.info(REQ_IN+" Log In Starts");
+		Preconditions.checkNotNull(user, "Field Cannot Be Null");
 		Response response=new Response();
-		String token=null;
-		try{token=userService.logIn(user);
-		}catch(Exception e) {
-			
-			response.setMessage(e.getMessage()+"");
-			response.setStatus(-1);
-			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-		}
+		String JWTtoken=userService.logIn(user);
+		
 		response.setMessage("Welcome "+user.getEmail());
 		response.setStatus(1);
-		res.addHeader("token", token);
+		
+		res.setHeader("JWTtoken", JWTtoken);
+		
+		
 		logger.info("Token Set In Header");
 		logger.info(RES_OUT+" Log In Ends ");
 		return new ResponseEntity<>(response, HttpStatus.OK);
@@ -116,13 +120,15 @@ public class UserController {
 	 * @return String
 	 */
 	@ApiOperation(value = "Activation Link")
-	@RequestMapping(value = "/activationlink", method = RequestMethod.GET)
+	@GetMapping("/activationlink")
 	public ResponseEntity<Response> activation(HttpServletRequest req) {
 		logger.info(REQ_IN+" Activating User");
+		
 		userService.claimToken(req.getQueryString());
-		Response response=new Response();
+		
 		response.setMessage("Your account is successfully activated");
 		response.setStatus(200);
+		
 		logger.info(RES_OUT+" User Activated");
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
@@ -136,16 +142,12 @@ public class UserController {
 	 * @throws Exception
 	 */
 	@ApiOperation(value = "Recover Account")
-	@RequestMapping(value = "/recoveraccount", method = RequestMethod.POST)
-	public ResponseEntity<Response> passwordRecover(@RequestParam String email ){
+	@PostMapping("/recoveraccount")
+	public ResponseEntity<Response> passwordRecover(@RequestParam String email ) throws Exception{
 		logger.info(REQ_IN+" Password Recover StartResetting Passworded");
-		Response response=new Response();
-		try{userService.passwordRecover(email);
-			}catch(Exception e) {
-				response.setMessage(e+"");
-				response.setStatus(-1);
-				return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-			}
+		
+		userService.passwordRecover(email);
+			
 		response.setMessage("Link is sent to your mail.. ");
 		response.setStatus(1);
 		logger.info(RES_OUT+" Password Recovered");
@@ -160,7 +162,7 @@ public class UserController {
 	 * @return ResponseEntity<Response>
 	 */
 	@ApiOperation(value = "Reset Password")
-	@RequestMapping(value="/resetpassword",method=RequestMethod.POST)
+	@PostMapping("/resetpassword")
 	public ResponseEntity<Response> resetPassword(@RequestParam String password,HttpServletRequest req){
 		logger.info(REQ_IN+" Resetting Password");
 		userService.resetPassword(req.getQueryString(),password);

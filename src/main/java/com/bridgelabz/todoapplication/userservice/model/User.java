@@ -6,8 +6,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.stereotype.Service;
 
-import io.swagger.annotations.ApiModelProperty;
-
 /**
  * Purpose : POJO Class for User.
  * 
@@ -17,17 +15,17 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @Document(collection = "user_detail")
 @Service
-public class User implements Serializable{
-	
+public class User implements Serializable {
+
 	private static final long serialVersionUID = 1L;
+	
 	@Id
-	@ApiModelProperty(hidden=true)
 	String id;
+	
 	String userName;
 	String email;
 	String phoneNumber;
 	String password;
-	@ApiModelProperty(hidden=true)
 	String status;
 
 	public User() {

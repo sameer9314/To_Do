@@ -16,9 +16,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 /**
  * Purpose : To provide methods to generate token.
  * 
- * @author Sameer Saurabh
- * @version 1.0
- * @Since 11/07/2018
+ * @author   Sameer Saurabh
+ * @version  1.0
+ * @Since    11/07/2018
  */
 @Service
 public class TokenUtility {

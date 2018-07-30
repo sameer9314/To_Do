@@ -1,5 +1,11 @@
 package com.bridgelabz.todoapplication.userservice.model;
 
+/**
+ * Purpose : POJO class for LoginDTO	
+ * @author   Sameer Saurabh
+ * @version  1.0
+ * @Since    20/07/2018
+ */
 public class LoginDTO {
 
 	private String email;
