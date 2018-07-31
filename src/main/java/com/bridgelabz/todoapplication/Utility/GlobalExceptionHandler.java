@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.bridgelabz.todoapplication.userservice.model.Response;
 /**
- * Purpose : 	
+ * Purpose : Class to handle all exception of the the class.
  * @author   Sameer Saurabh
  * @version  1.0
  * @Since  

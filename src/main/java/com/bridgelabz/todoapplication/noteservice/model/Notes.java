@@ -3,8 +3,8 @@ package com.bridgelabz.todoapplication.noteservice.model;
 import java.io.Serializable;
 import java.util.List;
 
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.stereotype.Service;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 /**
  * Purpose : POSO class of Notes.
@@ -13,11 +13,10 @@ import org.springframework.stereotype.Service;
  * @version  1.0
  * @Since    24/08/2018
  */
-@Document(collection = "notes")
-@Service
+@Document(indexName="notedatabase",type="notes")
 public class Notes implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+	@Id
 	private String id;
 	private String title;
 	private String description;

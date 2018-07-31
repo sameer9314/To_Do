@@ -3,17 +3,18 @@ package com.bridgelabz.todoapplication.noteservice.model;
 import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.elasticsearch.annotations.Document;
+
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * Purpose : POSO class for Label.
+ * Purpose : POZO class for Label.
  *  	
  * @author   Sameer Saurabh
  * @version  1.0
  * @Since    24/07/208
  */
-@Document(collection="label")
+@Document(indexName="labeldatabase",type="label")
 public class Label implements Serializable{
 	
 	private static final long serialVersionUID = 1L;

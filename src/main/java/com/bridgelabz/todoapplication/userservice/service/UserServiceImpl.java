@@ -78,11 +78,11 @@ public class UserServiceImpl implements UserService {
 	/**
 	 * @see com.bridgelabz.loginregistration.service.UserService#getUserDetails()
 	 * 
-	 *      Method is defined to get all user present in the database.
+	 * Method is defined to get all user present in the database.
 	 * @return List<User>
 	 */
 	public List<User> getUserDetails() {
-		logger.info(RES_OUT + " Get User Details Ends");
+		logger.info(RES_OUT +messages.get("101"));
 		return repository.findAll();
 	}
 	/**
@@ -95,18 +95,18 @@ public class UserServiceImpl implements UserService {
 	 * @throws Exception
 	 */
 	public void signUp(UserDto userRegistered) throws Exception {
-		RestPrecondition.checkNotNull(userRegistered.getEmail(), "Email Cannot Be Null");
-		RestPrecondition.checkNotNull(userRegistered.getUserName(), "User Name Cannot Be Null");
-		RestPrecondition.checkNotNull(userRegistered.getPhoneNumber(), "Phone Number Cannot Be Null");
-		RestPrecondition.checkNotNull(userRegistered.getPassword(), "Password Cannot Be Null");
+		RestPrecondition.checkNotNull(userRegistered.getEmail(), messages.get("102"));
+		RestPrecondition.checkNotNull(userRegistered.getUserName(),messages.get("103") );
+		RestPrecondition.checkNotNull(userRegistered.getPhoneNumber(), messages.get("104"));
+		RestPrecondition.checkNotNull(userRegistered.getPassword(), messages.get("105"));
 		
 		if (!userRegistered.getEmail().equals("") && !userRegistered.getUserName().equals("")
 				&& !userRegistered.getPhoneNumber().equals("") && !userRegistered.getPassword().equals("")) {
 			
 			Optional<User> dbUser = repository.findByEmail(userRegistered.getEmail());
 			if (dbUser.isPresent()) {
-				logger.error("User Allready Exist");
-				throw new Exception(userRegistered.getEmail() + "User Allready Exist");
+				logger.error(messages.get("106"));
+				throw new Exception(userRegistered.getEmail() + messages.get("106"));
 			}
 			User user = mapper.map(userRegistered, User.class);
 			user.setId(sequenceDao.getNextSequenceId(HOSTING_SEQ_KEY));
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
 
 			String validToken = token.generator(user);
 			repository.save(user);
-			logger.info("User registered");
+			logger.info(messages.get("107"));
 			String subject = "Account Confirmation Link";
 			String body = "Click the link given below to activate your account \n\n " + ipaddress + "/activationlink/?"
 					+ validToken;
@@ -123,11 +123,11 @@ public class UserServiceImpl implements UserService {
 
 			sender.send(subject, body, to);
 			// mailService.sendMail(subject, body, to);
-			logger.info("Mail Sent");
+			logger.info(messages.get("109"));
 			return;
 		}
-		logger.error("Field is null");
-		throw new Exception("Field cannot be null");
+		logger.error(messages.get("108"));
+		throw new Exception(messages.get("108"));
 	}
 
 	/**
@@ -139,8 +139,8 @@ public class UserServiceImpl implements UserService {
 	 * @throws Exception
 	 */
 	public String logIn(LoginDTO userloggedIn) throws Exception {
-		String email = Preconditions.checkNotNull(userloggedIn.getEmail(), "Email Cannot Be Null");
-		String password = Preconditions.checkNotNull(userloggedIn.getPassword(), "Password Cannot Be Null");
+		String email = Preconditions.checkNotNull(userloggedIn.getEmail(), messages.get("102"));
+		String password = Preconditions.checkNotNull(userloggedIn.getPassword(), messages.get("105"));
 		if (!email.equals("") && !password.equals("")) {
 			Optional<User> user = repository.findByEmail(email);
 			if (user.isPresent()) {
@@ -148,23 +148,22 @@ public class UserServiceImpl implements UserService {
 					if (passwordEncoder.matches(password, user.get().getPassword())) {
 						String validToken;
 						validToken=redis.getToken(user.get().getId());
-						System.out.println(validToken);
-						logger.info("User Logged In with Email : " + email);
+						logger.info(messages.get("110")+ email);
 						return validToken;
 					
 					}
-					logger.error("Password is incorrect");
-					throw new Exception("Password is incorrect");
+					logger.error(messages.get("111"));
+					throw new Exception(messages.get("111"));
 				} else {
-					logger.error("Account Not Activated");
-					throw new Exception("Go to your mail and click on the link first to validate your account");
+					logger.error(messages.get("112"));
+					throw new Exception(messages.get("112"));
 				}
 			}
-			logger.error("Email is Wrong");
-			throw new Exception("Email  is wrong ");
+			logger.error(messages.get("113"));
+			throw new Exception(messages.get("113"));
 		}
-		logger.error("Email or password or Both is null");
-		throw new Exception("Email and password cannot be null");
+		logger.error(messages.get("114"));
+		throw new Exception(messages.get("114"));
 	}
 
 	/**
@@ -174,16 +173,16 @@ public class UserServiceImpl implements UserService {
 	 * @param email
 	 */
 	public void claimToken(String claimedToken) {
-		RestPrecondition.checkNotNull(claimedToken, "Token Cannot Be Null");
+		RestPrecondition.checkNotNull(claimedToken, messages.get("115"));
 		String email = token.parseJWT(claimedToken).getSubject();
 		
 		Optional<User> dbUser = repository.findByEmail(email);
-		logger.info("User Founded With Email : " + email);
-		logger.info("Setting Status To True");
+		logger.info(messages.get("116")+ email);
+		logger.info(messages.get("117"));
 		dbUser.get().setStatus("true");
 		
 		redis.setToken(claimedToken);
-		logger.info("Storing User Token To Redis");
+		logger.info(messages.get("118"));
 		repository.save(dbUser.get());
 	}
 
@@ -195,25 +194,25 @@ public class UserServiceImpl implements UserService {
 	 * @throws Exception
 	 */
 	public void passwordRecover(String email) throws Exception {
-		RestPrecondition.checkNotNull(email, "Email Cannot Be Null");
+		RestPrecondition.checkNotNull(email, messages.get("102"));
 		if (!email.equals("")) {
 			Optional<User> user = repository.findByEmail(email);
 			if (user.isPresent()) {
 				String validToken = token.generator(user.get());
-				String subject = "Account Confirmation Link";
+				String subject = messages.get("120");
 				String body = "Click the link given below reset your password \n\n " + ipaddress + "/resetpassword/?"
 						+ validToken;
 				String to = user.get().getEmail();
 				sender.send(subject, body, to);
 				// mailService.sendMail(subject, body, to);
-				logger.info("Link Is Sent To User With The New Token");
+				logger.info(messages.get("119"));
 				return;
 			}
-			logger.error("Email Not Valid");
-			throw new Exception("Email Not Valid,Please Re Write Or SignUp First");
+			logger.error(messages.get("113"));
+			throw new Exception(messages.get("113"));
 		}
-		logger.error("Email Is Null");
-		throw new Exception("Email Cannot Be Null");
+		logger.error(messages.get("102"));
+		throw new Exception(messages.get("102"));
 	}
 
 	/**
@@ -223,8 +222,8 @@ public class UserServiceImpl implements UserService {
 	 * @param password
 	 */
 	public void resetPassword(String claimedToken, String password) {
-		RestPrecondition.checkNotNull(claimedToken, "Token Cannot Be Null");
-		RestPrecondition.checkNotNull(password, "Password Cannot Be Null");
+		RestPrecondition.checkNotNull(claimedToken, messages.get("115"));
+		RestPrecondition.checkNotNull(password, messages.get("105"));
 		Optional<User> dbUser = repository.findByEmail(token.parseJWT(claimedToken).getSubject());
 		dbUser.get().setPassword(passwordEncoder.encode(password));
 		dbUser.get().setStatus("true");

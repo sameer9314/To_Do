@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Stream;
 
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -16,13 +15,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bridgelabz.todoapplication.Utility.Messages;
 import com.bridgelabz.todoapplication.noteservice.model.Label;
 import com.bridgelabz.todoapplication.noteservice.model.NoteDto;
 import com.bridgelabz.todoapplication.noteservice.model.Notes;
+import com.bridgelabz.todoapplication.noteservice.repository.LabelElasticRepository;
 import com.bridgelabz.todoapplication.noteservice.repository.LabelRepository;
+import com.bridgelabz.todoapplication.noteservice.repository.NoteElasticRepository;
 import com.bridgelabz.todoapplication.noteservice.repository.NoteRepository;
 import com.bridgelabz.todoapplication.sequence.dao.SequenceDao;
-import com.bridgelabz.todoapplication.tokenutility.TokenUtility;
 import com.bridgelabz.todoapplication.userservice.service.UserServiceImpl;
 import com.google.common.base.Preconditions;
 
@@ -41,22 +42,25 @@ public class NoteServiceImpl implements NoteService {
 	@Autowired
 	LabelRepository labelRepository;
 
-	@Autowired
-	TokenUtility tokenUtility;
-
-	@Autowired
-	Notes note;
+	/*@Autowired
+	Notes note;*/
 
 	@Autowired
 	ModelMapper mapper;
 
 	private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-	final String REQ_IN = "REQ_IN";
-	final String RES_OUT = "RES_OUT";
-	
 	@Autowired
 	private SequenceDao sequenceDao;
+	
+	@Autowired
+	Messages messages;
+	
+	@Autowired
+	NoteElasticRepository noteElasricRepository;
+	
+	@Autowired
+	LabelElasticRepository labelElasricRepository;
 	
 	private static final String HOSTING_SEQ_KEY = "hosting";
 	
@@ -69,18 +73,11 @@ public class NoteServiceImpl implements NoteService {
 	 */
 	@Override
 	public String createNote(NoteDto newNote, String userId, String labelName) throws Exception {
-		logger.info("note creation method starts");
-		Preconditions.checkNotNull(newNote.getDescription(),"Note Description Cannote Be Null");
-		Preconditions.checkNotNull(newNote.getTitle(),"Note Title Cannot Be Null");
-		
-		//Preconditions.checkNotNull(token,"Token Cannot Be Null");
-		Preconditions.checkNotNull(labelName,"Label Name Cannot Be Null");
-		
-		//if (!token.equals("") && (!newNote.getDescription().equals("") || !newNote.getTitle().equals("")))
+		Preconditions.checkNotNull(newNote.getDescription(),messages.get("161"));
+		Preconditions.checkNotNull(newNote.getTitle(),messages.get("162"));
+		Preconditions.checkNotNull(labelName,messages.get("163"));
 			if ((!newNote.getDescription().equals("") || !newNote.getTitle().equals("")))
 		{
-			//String userId = Preconditions.checkNotNull(tokenUtility.parseJWT(token).getId(), "Not valid token");
-			
 			Notes note = mapper.map(newNote, Notes.class);
 			note.setId(sequenceDao.getNextSequenceId(HOSTING_SEQ_KEY));
 			note.setCreationDate(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new java.util.Date()));
@@ -91,7 +88,7 @@ public class NoteServiceImpl implements NoteService {
 			// If note is created using label.
 			if (!labelName.equals("")) {
 				Optional<Label> label = Preconditions.checkNotNull(labelRepository.findLabelByLabelName(labelName),
-						"Label Not Found With name " + labelName);
+						messages.get("164")+ labelName);
 				newNote.getLabel().add(label.get());
 			}
 			
@@ -103,20 +100,21 @@ public class NoteServiceImpl implements NoteService {
 				Optional<Label> foundLabel = labelRepository.findLabelByLabelName(label.getLabelName());
 				if (foundLabel.isPresent() == false && !label.getLabelName().equals("")) {
 					labelRepository.save(label);
+					labelElasricRepository.save(label);
 				}
 			}
-			
 			// If archive is true then pinned must be false.  
 			if (note.isArchive()==true) {
 				note.setPinned(false);
 			}
-			logger.info("saving note");
+			logger.info(messages.get("165"));
 			noteRepository.save(note);
-			logger.info("Note Created" + note.toString());
+			noteElasricRepository.save(note);
+			logger.info(messages.get("166")+note.getId());
 			return note.getId();
 		}
-		logger.error("Field Is Null");
-		throw new Exception("Field Cannot Be Null");
+		logger.error(messages.get("121"));
+		throw new Exception(messages.get("121"));
 	}
 
 	/**
@@ -138,12 +136,11 @@ public class NoteServiceImpl implements NoteService {
 	 */
 	@Override
 	public List<Notes> getNotes(String userId) {
-		logger.info(REQ_IN + " Get Notes ");
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
 		
 		List<Notes> notes = Preconditions.checkNotNull(
-				noteRepository.findByUserId(userId),
-				"No Note is Available For The Logged In User");
+				noteRepository.findByUserId(userId),messages.get("167")
+				);
 
 		List<Notes> listNotes = new ArrayList<>();
 
@@ -167,7 +164,6 @@ public class NoteServiceImpl implements NoteService {
 			}
 		}
 
-		logger.info(RES_OUT + " Get Notes Ends");
 		return listNotes;
 	}
 
@@ -179,8 +175,7 @@ public class NoteServiceImpl implements NoteService {
 	 */
 	@Override
 	public List<Notes> getArchiveNotes(String userId) {
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		logger.info(REQ_IN + " Get Archive Notes ");
+		Preconditions.checkNotNull(userId,messages.get("168"));
 		List<Notes> notes = noteRepository.findByUserId(userId);
 		List<Notes> listNotes = new ArrayList<>();
 		for (Notes n : notes) {
@@ -188,7 +183,6 @@ public class NoteServiceImpl implements NoteService {
 				listNotes.add(n);
 			}
 		}
-		logger.info(RES_OUT + " Get Archive Notes Ends");
 		return listNotes;
 	}
 
@@ -199,7 +193,7 @@ public class NoteServiceImpl implements NoteService {
 	 * @return
 	 */
 	public List<String> getLabel(String userId) {
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
 		List<Label> labels = labelRepository.findByUserId(userId);
 		List<String> labelName = new ArrayList<>();
 		for (Label label : labels) {
@@ -216,13 +210,13 @@ public class NoteServiceImpl implements NoteService {
 	 * @throws Exception
 	 */
 	public void createLabel(String userId, Label label) throws Exception {
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(label.getLabelName(),"Label Name Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(label.getLabelName(),messages.get("163"));
 		
 		List<Label> foundLabels = labelRepository.findByUserId(userId);
 		for (Label foundLabel : foundLabels) {
 			if (foundLabel.getLabelName().equals(label.getLabelName())) {
-				throw new Exception("Label is already present with the name " + label.getLabelName());
+				throw new Exception(messages.get("170") + label.getLabelName());
 			}
 		}
 		label.setId(sequenceDao.getNextSequenceId(HOSTING_SEQ_KEY));
@@ -239,12 +233,12 @@ public class NoteServiceImpl implements NoteService {
 	 * @throws Exception
 	 */
 	public void addLabelInNote(String userId, Label newLabel, String noteId) throws Exception {
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(newLabel.getLabelName(),"New Label Name Cannot Be Null");
-		Preconditions.checkNotNull(noteId,"Note Id Cannote Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(newLabel.getLabelName(),messages.get("163"));
+		Preconditions.checkNotNull(noteId,messages.get("169"));
 		
 		List<Notes> notes = Preconditions.checkNotNull(noteRepository.findByUserId(userId),
-				"No Note Found For the User With User Id : " + userId);
+				messages.get("167") + userId);
 		Notes foundNote = Preconditions.checkNotNull(
 				notes.stream().filter(t -> t.getId().equals(noteId)).findFirst().orElse(null),
 				"No Note Found With id " + noteId);
@@ -254,7 +248,7 @@ public class NoteServiceImpl implements NoteService {
 		for (Label foundLabel : foundLabels) {
 			if (foundLabel.getLabelName().equals(newLabel.getLabelName())) {
 				throw new Exception(
-						"Label already present with in the note with label name " + newLabel.getLabelName());
+						messages.get("170") + newLabel.getLabelName());
 			}
 		}
 		
@@ -283,10 +277,10 @@ public class NoteServiceImpl implements NoteService {
 	 * @return List<Notes>
 	 */
 	public List<Notes> getNoteWithLabel(String userId, String labelName) {
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(labelName,"Label Name Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(labelName,messages.get("163"));
 		List<Notes> notes = noteRepository.findByUserId(userId);
-
+		Preconditions.checkNotNull(notes,messages.get("167"));
 		List<Notes> foundNotes = new ArrayList<>();
 
 		for (Notes note : notes) {
@@ -308,19 +302,16 @@ public class NoteServiceImpl implements NoteService {
 	 * @param labelName
 	 */
 	public void removeLabel(String userId, String labelName) {
-		logger.info(REQ_IN + " Remove Label Method Starts ");
-		
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(labelName,"Label Name Cannote Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(labelName,messages.get("163"));
 		
 		List<Notes> notes = Preconditions.checkNotNull(
-				noteRepository.findByUserId(userId), "No Notes Found For The User");
+				noteRepository.findByUserId(userId), messages.get("167"));
 		for (Notes note : notes) {
 			List<Label> labels = note.getLabel();
 
 			for (Label label : labels) {
 				if (label.getLabelName().equals(labelName)) {
-					logger.info(label.getId());
 					labelRepository.deleteById(label.getId());
 					labels.remove(label);
 				}
@@ -329,7 +320,6 @@ public class NoteServiceImpl implements NoteService {
 			note.setLabel(labels);
 			noteRepository.save(note);
 		}
-		logger.info(RES_OUT + " Remove Label Method Ends");
 	}
 
 	/**
@@ -340,17 +330,16 @@ public class NoteServiceImpl implements NoteService {
 	 * @param noteId
 	 */
 	public void removeNoteLabel(String userId, String labelName, String noteId) {
-		logger.info(REQ_IN + " Label Removed From Method Starts ");
-		
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(labelName,"Label Name Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(labelName,messages.get("163"));
+		Preconditions.checkNotNull(noteId,messages.get("169"));
 		
 		List<Notes> notes = Preconditions.checkNotNull(
-				noteRepository.findByUserId(userId), "No Notes Found For The User");
+				noteRepository.findByUserId(userId), messages.get("167"));
 
 		Notes foundNote = Preconditions.checkNotNull(
 				notes.stream().filter(t -> t.getId().equals(noteId)).findFirst().orElse(null),
-				"Note Is Not Present With The Id " + noteId + " In The Logged In User");
+				messages.get("167") + noteId + " In The Logged In User");
 
 		List<Label> labels = foundNote.getLabel();
 		for (Label label : labels) {
@@ -359,9 +348,8 @@ public class NoteServiceImpl implements NoteService {
 			}
 			break;
 		}
-		note.setLabel(labels);
-		noteRepository.save(note);
-		logger.info(RES_OUT + " Label Removed From Method Ends");
+		foundNote.setLabel(labels);
+		noteRepository.save(foundNote);
 	}
 
 	/**
@@ -374,16 +362,14 @@ public class NoteServiceImpl implements NoteService {
 	 */
 	@Override
 	public Notes getParticularNote(String userId, String id) throws Exception {
-		logger.info(REQ_IN + " Getting Note ");
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(id,"Note Id Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(id,messages.get("169"));
 		List<Notes> notes = Preconditions
-				.checkNotNull(noteRepository.findByUserId(userId), "Not Valid User");
+				.checkNotNull(noteRepository.findByUserId(userId), messages.get("167") + userId);
 
 		Notes foundNote = Preconditions.checkNotNull(
 				notes.stream().filter(t -> t.getId().equals(id)).findFirst().orElse(null),
-				"Note Is Not Present With The Id " + id + " In The Logged In User");
-		logger.info(RES_OUT + " Printing Note" + foundNote.toString());
+				messages.get("167") + id );
 		return foundNote;
 	}
 
@@ -398,22 +384,20 @@ public class NoteServiceImpl implements NoteService {
 	 */
 	@Override
 	public Notes updateNotes(String userId, NoteDto updatedNote,String noteId) throws Exception {
-		logger.info(REQ_IN + " Updating Note ");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(noteId,messages.get("169"));
 		
-		Preconditions.checkNotNull(userId,"User Cannot Be Null");
-		Preconditions.checkNotNull(noteId,"Note Id Cannot Be Null");
-		
-		Preconditions.checkNotNull(updatedNote.getDescription(),"Note Description Cannote Be Null");
-		Preconditions.checkNotNull(updatedNote.getTitle(),"Note Title Cannot Be Null");
+		Preconditions.checkNotNull(updatedNote.getDescription(),messages.get("161"));
+		Preconditions.checkNotNull(updatedNote.getTitle(),messages.get("162"));
 		
 		List<Notes> notes = Preconditions.checkNotNull(noteRepository.findByUserId(userId),
-				"No notes Present For User Id : " + userId);
+				messages.get("167")  + userId);
 
 		Notes foundNote = Preconditions.checkNotNull(
 				notes.stream().filter(t -> t.getId().equals(noteId)).findFirst().orElse(null),
-				"Note Is Not Present With The Id " + noteId + " In The Logged In User");
+				messages.get("167") + noteId );
 		
-		note=mapper.map(updatedNote, Notes.class);
+		Notes note=mapper.map(updatedNote, Notes.class);
 		note.setId(foundNote.getId());
 		note.setCreationDate(foundNote.getCreationDate());
 		note.setUserId(foundNote.getUserId());
@@ -447,7 +431,6 @@ public class NoteServiceImpl implements NoteService {
 		}
 		note.setLabel(foundNoteLabels);
 		noteRepository.save(note);
-		logger.info(RES_OUT + " Updated Note : " + foundNote.toString());
 		return foundNote;
 	}
 
@@ -460,25 +443,23 @@ public class NoteServiceImpl implements NoteService {
 	 */
 	@Override
 	public void removeNote(String userId, String id) throws Exception {
-		logger.info(REQ_IN + " Removing Note ");
-		
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(id,"Note Id Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(id,messages.get("169"));
 		
 		List<Notes> notes = Preconditions
-				.checkNotNull(noteRepository.findByUserId(userId), "No Notes Of The User");
+				.checkNotNull(noteRepository.findByUserId(userId), messages.get("167"));
 
 		Notes foundNote = Preconditions.checkNotNull(
 				notes.stream().filter(t -> t.getId().equals(id)).findFirst().orElse(null),
-				"Note Is Not Present With The Id " + id + " In The Logged In User");
+				messages.get("167") + id);
 		
 		if(foundNote.isTrash()==false) {
 			foundNote.setTrash(true);
-			logger.info(RES_OUT + " Trashed Note : " + foundNote.toString());
+			logger.info(" Trashed Note : " + foundNote.toString());
 			noteRepository.save(foundNote);
 			return;
 		}
-		logger.info(RES_OUT + " Deleted Note : " + foundNote.toString());
+		logger.info(" Deleted Note : " + foundNote.toString());
 		noteRepository.delete(foundNote);
 	}
 
@@ -491,12 +472,12 @@ public class NoteServiceImpl implements NoteService {
 	 * @throws ParseException
 	 */
 	public void doSetReminder(String userId, String noteId, String reminderTime) throws ParseException {
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(noteId,"Note Id Cannot Be Null");
-		Preconditions.checkNotNull(reminderTime,"Reminder Time Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(noteId,messages.get("169"));
+		Preconditions.checkNotNull(reminderTime,messages.get("171"));
 		
 		List<Notes> notes = Preconditions
-				.checkNotNull(noteRepository.findByUserId(userId), "No user");
+				.checkNotNull(noteRepository.findByUserId(userId), messages.get("167"));
 		for (Notes note : notes) {
 			if (note.getId().equals(noteId)) {
 				Date reminder = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(reminderTime);
@@ -506,7 +487,7 @@ public class NoteServiceImpl implements NoteService {
 
 					@Override
 					public void run() {
-						logger.info("Reminder task:" + note.toString());
+						logger.info( messages.get("172")+ note.toString());
 					}
 				}, timeDifference);
 
@@ -521,11 +502,11 @@ public class NoteServiceImpl implements NoteService {
 	 * @return
 	 */
 	public List<Notes> getTrashedNotes(String userId){
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
 		
 		List<Notes> notes = Preconditions
 				.checkNotNull(noteRepository.findByUserId(userId), 
-						"No Notes Of The User");
+						messages.get("167"));
 		List<Notes> foundNotes=new ArrayList<>();
 		for(Notes note : notes) {
 			if(note.isTrash()==true) {
@@ -544,13 +525,13 @@ public class NoteServiceImpl implements NoteService {
 	 * @return
 	 */
 	public String pinnedUnpinned(String userId, String noteId) {
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(noteId,"Note Id Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(noteId,messages.get("169"));
 		
 		List<Notes> notes = Preconditions
-				.checkNotNull(noteRepository.findByUserId(userId), "No Note Found");
+				.checkNotNull(noteRepository.findByUserId(userId),messages.get("167"));
 		Notes note=	Preconditions.checkNotNull(notes.stream().filter(t -> t.getId().equals(noteId)).findFirst().orElse(null), 
-				"Note Is Not Present With The Id " + noteId + " In The Logged In User");
+				messages.get("167"));
 		if(note.isArchive()!=true) {
 			if(note.isPinned()==false) {
 			note.setPinned(true);
@@ -572,13 +553,13 @@ public class NoteServiceImpl implements NoteService {
 	 * @return
 	 */
 	public String archivedOrRemoveArchived(String userId, String noteId) {
-		Preconditions.checkNotNull(userId,"Token Cannot Be Null");
-		Preconditions.checkNotNull(noteId,"Note Id Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(noteId,messages.get("169"));
 		
 		List<Notes> notes = Preconditions
-				.checkNotNull(noteRepository.findByUserId(userId), "No Note Found");
+				.checkNotNull(noteRepository.findByUserId(userId), messages.get("167"));
 		Notes note=	Preconditions.checkNotNull(notes.stream().filter(t -> t.getId().equals(noteId)).findFirst().orElse(null), 
-				"Note Is Not Present With The Id " + noteId + " In The Logged In User");
+				messages.get("167") + noteId );
 		if(note.isArchive()!=true) {
 			note.setArchive(true);
 			note.setPinned(false);
@@ -597,11 +578,11 @@ public class NoteServiceImpl implements NoteService {
 	 * @return List<Notes>
 	 */
 	public List<Notes> viewTrash(String userId, String noteId){
-		Preconditions.checkNotNull(userId,"User Id Cannot Be Null");
-		Preconditions.checkNotNull(noteId,"Note Id Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(noteId,messages.get("169"));
 		
 		List<Notes> notes = Preconditions
-				.checkNotNull(noteRepository.findByUserId(userId), "No Note Found");
+				.checkNotNull(noteRepository.findByUserId(userId), messages.get("167"));
 		List<Notes> trashedNotes=new ArrayList<>();
 		
 		for(Notes note:notes) {

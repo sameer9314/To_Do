@@ -72,14 +72,14 @@ public class UserController {
 	@ApiOperation(value = "New User Sign Up")
 	@PostMapping("/signup")
 	public ResponseEntity<Response> signUp(@RequestBody UserDto user) throws Exception {
-		logger.info(REQ_IN+" Sign Up Starts");
-		Preconditions.checkNotNull(user, "Field Cannot Be Null");
+		logger.info(REQ_IN+messages.get("135"));
+		Preconditions.checkNotNull(user,messages.get("121") );
 		
 		userService.signUp(user);
 		
-		response.setMessage("Mail sent to the user with email " + user.getEmail());
+		response.setMessage(messages.get("122") + user.getEmail());
 		response.setStatus(1);
-		logger.info(RES_OUT+" Sign Up ends");
+		logger.info(RES_OUT+messages.get("135"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
@@ -96,8 +96,8 @@ public class UserController {
 	@ApiOperation(value = "Resgistered User Log In")
 	@PostMapping("/login")
 	public ResponseEntity<Response> logIn(@RequestBody LoginDTO user, HttpServletResponse res) throws Exception {
-		logger.info(REQ_IN+" Log In Starts");
-		Preconditions.checkNotNull(user, "Field Cannot Be Null");
+		logger.info(REQ_IN+messages.get("133"));
+		Preconditions.checkNotNull(user, messages.get("121"));
 		Response response=new Response();
 		String JWTtoken=userService.logIn(user);
 		
@@ -107,8 +107,8 @@ public class UserController {
 		res.setHeader("JWTtoken", JWTtoken);
 		
 		
-		logger.info("Token Set In Header");
-		logger.info(RES_OUT+" Log In Ends ");
+		logger.info(messages.get("123"));
+		logger.info(RES_OUT+messages.get("133"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
@@ -122,14 +122,14 @@ public class UserController {
 	@ApiOperation(value = "Activation Link")
 	@GetMapping("/activationlink")
 	public ResponseEntity<Response> activation(HttpServletRequest req) {
-		logger.info(REQ_IN+" Activating User");
+		logger.info(REQ_IN+messages.get("131"));
 		
 		userService.claimToken(req.getQueryString());
 		
-		response.setMessage("Your account is successfully activated");
+		response.setMessage(messages.get("124"));
 		response.setStatus(200);
 		
-		logger.info(RES_OUT+" User Activated");
+		logger.info(RES_OUT+messages.get("131"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
@@ -144,13 +144,13 @@ public class UserController {
 	@ApiOperation(value = "Recover Account")
 	@PostMapping("/recoveraccount")
 	public ResponseEntity<Response> passwordRecover(@RequestParam String email ) throws Exception{
-		logger.info(REQ_IN+" Password Recover StartResetting Passworded");
+		logger.info(REQ_IN+messages.get("125"));
 		
 		userService.passwordRecover(email);
 			
-		response.setMessage("Link is sent to your mail.. ");
+		response.setMessage(messages.get("126"));
 		response.setStatus(1);
-		logger.info(RES_OUT+" Password Recovered");
+		logger.info(RES_OUT+messages.get("125"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
@@ -164,12 +164,12 @@ public class UserController {
 	@ApiOperation(value = "Reset Password")
 	@PostMapping("/resetpassword")
 	public ResponseEntity<Response> resetPassword(@RequestParam String password,HttpServletRequest req){
-		logger.info(REQ_IN+" Resetting Password");
+		logger.info(REQ_IN+messages.get("127"));
 		userService.resetPassword(req.getQueryString(),password);
 		Response response=new Response();
-		response.setMessage("Your Password Is Updated ");
+		response.setMessage(messages.get("129"));
 		response.setStatus(200);
-		logger.info(RES_OUT+" Password Successfully Reset");
+		logger.info(RES_OUT+messages.get("127"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

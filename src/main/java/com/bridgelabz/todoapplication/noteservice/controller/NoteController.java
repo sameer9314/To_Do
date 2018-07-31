@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bridgelabz.todoapplication.Utility.Messages;
 import com.bridgelabz.todoapplication.noteservice.model.Label;
 import com.bridgelabz.todoapplication.noteservice.model.NoteDto;
 import com.bridgelabz.todoapplication.noteservice.model.Notes;
@@ -46,11 +47,15 @@ public class NoteController {
 	@Autowired
 	Response response;
 	
+	@Autowired
+	Messages messages;
+	
 	private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	final String REQ_IN = "REQ_IN";
 	final String RES_OUT = "RES_OUT";
-
+	
+	
 	/**
 	 * This method is written to create Notes for the logged in User.
 	 * 
@@ -61,18 +66,17 @@ public class NoteController {
 	@ApiOperation(value = "Create New Note")
 	@PostMapping(value = "/createnote")
 	public ResponseEntity<Response> createNote(@RequestBody NoteDto note,HttpServletRequest req ) throws Exception {
-		logger.info(REQ_IN + " Note Creation Starts");
-		
+		logger.info(REQ_IN +messages.get("137"));
 		String userId=req.getAttribute("userId").toString();
 		
-		Preconditions.checkNotNull(userId, "Token Is Null");
-		Preconditions.checkNotNull(note, "Note Cannot Be Null");
+		Preconditions.checkNotNull(userId,messages.get("168"));
+		Preconditions.checkNotNull(note,messages.get("173") );
 		
 		String noteId=noteService.createNote(note, userId,"");
 		
-		response.setMessage("Note Created with id : "+noteId);
+		response.setMessage(messages.get("166")+noteId);
 		response.setStatus(200);
-		logger.info(RES_OUT + " Notes Creation Ends");
+		logger.info(RES_OUT + messages.get("137"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
@@ -99,7 +103,7 @@ public class NoteController {
 	@ApiOperation(value = "Get Notes")
 	@PostMapping(value = "/getnotes")
 	public ResponseEntity<Response> getNotes(HttpServletRequest req) {
-		
+		logger.info(REQ_IN +messages.get("159"));
 		response.setMessage(noteService.getNotes(req.getAttribute("userId").toString()).toString());
 		response.setStatus(200);
 		return new ResponseEntity<>(response, HttpStatus.OK);
@@ -113,6 +117,7 @@ public class NoteController {
 	@ApiOperation(value = "Get Archive Notes")
 	@PostMapping(value = "/archivenotes")
 	public List<Notes> getArchiveNotes(HttpServletRequest req){
+		logger.info(REQ_IN +messages.get("160"));
 		return noteService.getArchiveNotes(req.getAttribute("userId").toString());
 	}
 	
@@ -128,14 +133,14 @@ public class NoteController {
 	@ApiOperation(value = "Get Particular Note")
 	@PostMapping(value = "/getparticularnote")
 	public ResponseEntity<Response> getParticularNote(HttpServletRequest req, @RequestParam String id) throws Exception {
-		logger.info(REQ_IN + " Updating Notes Starts");
+		logger.info(REQ_IN + messages.get("138"));
 		
 		Notes note=noteService.getParticularNote(req.getAttribute("userId").toString(), id);
 		
 		response.setMessage(note.toString());
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + " Updating Notes Ends");
+		logger.info(RES_OUT +messages.get("138"));
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -148,14 +153,14 @@ public class NoteController {
 	@ApiOperation(value = "Prints All Label")
 	@PostMapping(value = "/getallabel")
 	public ResponseEntity<Response> getLabel(HttpServletRequest req) {
-		logger.info(REQ_IN + " Get Label Starts");
+		logger.info(REQ_IN + messages.get("139"));
 		
 		List<String> labelName=noteService.getLabel(req.getAttribute("userId").toString());
 		
 		response.setMessage(labelName.toString());
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + " Get Label Ends");
+		logger.info(RES_OUT + messages.get("139"));
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -170,14 +175,14 @@ public class NoteController {
 	@ApiOperation(value = "Add Label To Note")
 	@PostMapping(value = "/addlebel")
 	public ResponseEntity<Response> addLabelInNote(HttpServletRequest req,@RequestBody Label newLabel,@RequestParam String noteId) throws Exception {
-		logger.info(REQ_IN + " Add Label Starts");
+		logger.info(REQ_IN + messages.get("140"));
 		
 		noteService.addLabelInNote(req.getAttribute("userId").toString(),newLabel,noteId);
 	
 		response.setMessage("Label Added");
 		response.setStatus(1);
 		
-		logger.info(RES_OUT + " Add Label Ends");
+		logger.info(RES_OUT + messages.get("140"));
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -192,14 +197,14 @@ public class NoteController {
 	@ApiOperation(value = "Create Label")
 	@PostMapping(value = "/createlabel")
 	public ResponseEntity<Response> createLabel(HttpServletRequest req,@RequestBody Label newLabel) throws Exception {
-		logger.info(REQ_IN + " Create Label Starts ");
+		logger.info(REQ_IN + messages.get("141"));
 	
 		noteService.createLabel(req.getAttribute("userId").toString(),newLabel);
 		
 		response.setMessage("Label Created");
 		response.setStatus(1);
 		
-		logger.info(RES_OUT + " Create Label Ends");
+		logger.info(RES_OUT + messages.get("141") );
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -215,14 +220,14 @@ public class NoteController {
 	@ApiOperation(value = "Create Note With Existing Label")
 	@PostMapping(value = "/createnotewithlabel")
 	public ResponseEntity<Response> createNoteWithLabel(@RequestBody NoteDto note,HttpServletRequest req,@RequestParam String labelName) throws Exception {
-		logger.info(REQ_IN + " Create Note With Existing Label Starts ");
+		logger.info(REQ_IN + messages.get("142"));
 		
 		noteService.createNote(note,req.getAttribute("userId").toString(),labelName);
 		
 		response.setMessage("Note Created With Label");
 		response.setStatus(1);
 		
-		logger.info(RES_OUT + " Create Note With Existing Label Ends");
+		logger.info(RES_OUT + messages.get("142"));
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -237,7 +242,7 @@ public class NoteController {
 	@ApiOperation(value = "Prints Notes With Label")
 	@PostMapping(value = "/getnoteswithlabel")
 	public ResponseEntity<Response> getNoteWithLabel(HttpServletRequest req,@RequestParam String labelName) {
-		logger.info(REQ_IN + " Get Notes With Label Starts");
+		logger.info(REQ_IN + messages.get("149"));
 		List<Notes> notes=null;
 		
 		notes=noteService.getNoteWithLabel(req.getAttribute("userId").toString(),labelName);
@@ -245,7 +250,7 @@ public class NoteController {
 		response.setMessage(notes.toString());
 		response.setStatus(1);
 		
-		logger.info(RES_OUT + " Get Notes With Label Ends");
+		logger.info(RES_OUT +  messages.get("149"));
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 
@@ -259,14 +264,14 @@ public class NoteController {
 	@ApiOperation(value = "Remove Label ")
 	@PostMapping(value = "/removelabel")
 	public ResponseEntity<Response> removeLabel(HttpServletRequest req,@RequestParam String labelName) {
-		logger.info(REQ_IN + " Remove Label  Starts");
+		logger.info(REQ_IN + messages.get("150"));
 		
 		noteService.removeLabel(req.getAttribute("userId").toString(),labelName);
 		
 		response.setMessage(labelName+" removed");
 		response.setStatus(1);
 		
-		logger.info(RES_OUT + " Remove Label  Ends");
+		logger.info(RES_OUT + messages.get("150"));
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -282,14 +287,14 @@ public class NoteController {
 	@PostMapping(value = "/removeNoteLabel")
 	public ResponseEntity<Response> removeNoteLabel(HttpServletRequest req,
 			@RequestParam String labelName,@RequestParam String noteId) {
-		logger.info(REQ_IN + " Remove Note Label  Starts");
+		logger.info(REQ_IN + messages.get("151"));
 		
 		noteService.removeNoteLabel(req.getAttribute("userId").toString(),labelName,noteId);
 		
 		response.setMessage(labelName+" removed from note");
 		response.setStatus(1);
 		
-		logger.info(RES_OUT + " Remove Note Label  Ends");
+		logger.info(RES_OUT + messages.get("151"));
 		return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 	
@@ -307,14 +312,14 @@ public class NoteController {
 	public ResponseEntity<Response> updateNotes(HttpServletRequest req,@RequestBody NoteDto note,
 			@RequestParam String noteId) throws Exception {
 		
-		logger.info(REQ_IN + " Updating Notes Starts");
+		logger.info(REQ_IN + messages.get("152") );
 		
 		Notes updatedNote=noteService.updateNotes(req.getAttribute("userId").toString(),note,noteId);
 		
 		response.setMessage("Updated Note Is :- "+ updatedNote);
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + " Updating Notes Ends");
+		logger.info(RES_OUT +  messages.get("152") );
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
@@ -330,14 +335,14 @@ public class NoteController {
 	@ApiOperation(value = "Remove Note")
 	@PostMapping(value = "/removenote/{id}")
 	public ResponseEntity<Response> removeNote(HttpServletRequest req, @PathVariable("id") String id) throws Exception {
-		logger.info(REQ_IN + " Removing Notes Starts");
+		logger.info(REQ_IN + messages.get("153") );
 		
 		noteService.removeNote(req.getAttribute("userId").toString(), id);
 		
 		response.setMessage("Note removed.");
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + " Removing Notes Ends");
+		logger.info(RES_OUT + messages.get("153"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
@@ -354,14 +359,14 @@ public class NoteController {
 	@ApiOperation(value = "Set Reminder")
 	@PostMapping(value = "/setreminder")
 	public ResponseEntity<Response> doSetReminder(HttpServletRequest req, @RequestParam String noteId,@RequestParam String reminderTime) throws ParseException {
-		logger.info(REQ_IN + " Set Reminder Starts");
+		logger.info(REQ_IN + messages.get("154"));
 		
 		noteService.doSetReminder(req.getAttribute("userId").toString(),noteId,reminderTime);
 		
 		response.setMessage("Reminder Set");
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + " Set Reminder Ends");
+		logger.info(RES_OUT + messages.get("154"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
@@ -374,12 +379,12 @@ public class NoteController {
 	@ApiOperation(value="Get Trashed Notes")
 	@PostMapping(value="/gettrashednotes")
 	public ResponseEntity<Response> getTrashedNotes(HttpServletRequest req){
-		logger.info(REQ_IN + "Get Trashed Notes Starts");
+		logger.info(REQ_IN + messages.get("155"));
 		
 		response.setMessage(noteService.getTrashedNotes(req.getAttribute("userId").toString()).toString());
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + "Get Trashed Notes Ends");
+		logger.info(RES_OUT + messages.get("155"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
@@ -393,12 +398,12 @@ public class NoteController {
 	@ApiOperation(value="Pinned Or Unpinned Notes")
 	@PostMapping(value="/pinnedorunpinnednotes")
 	public ResponseEntity<Response>  pinnedUnpinned(HttpServletRequest req,@RequestParam String noteId) {
-		logger.info(REQ_IN + "Pinned Or Unpinned Notes Starts");
+		logger.info(REQ_IN + messages.get("156"));
 		
 		response.setMessage(noteService.pinnedUnpinned(req.getAttribute("userId").toString(),noteId));
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + "Pinned Or Unpinned Notes Ends");
+		logger.info(RES_OUT + messages.get("156"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
@@ -412,12 +417,12 @@ public class NoteController {
 	@ApiOperation(value="Pinned Notes")
 	@PostMapping(value="/dopinnednotes")
 	public ResponseEntity<Response>  archivedOrRemoveArchived(HttpServletRequest req,@RequestParam String noteId) {
-		logger.info(REQ_IN + "Archived Or Removed Archived Notes Starts");
+		logger.info(REQ_IN + messages.get("157"));
 		
 		response.setMessage(noteService.archivedOrRemoveArchived(req.getAttribute("userId").toString(),noteId));
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + "Archived Or Removed Archived Notes Ends");
+		logger.info(RES_OUT + messages.get("157"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
@@ -431,7 +436,7 @@ public class NoteController {
 	@ApiOperation(value="View Trashed Notes")
 	@PostMapping(value="/viewtrashednotes")
 	public ResponseEntity<Response>  viewTrash(HttpServletRequest req,@RequestParam String noteId) {
-		logger.info(REQ_IN + "View Trash Notes Starts");
+		logger.info(REQ_IN + messages.get("158"));
 		
 		Preconditions.checkNotNull(req.getAttribute("userId").toString(), "Token Is Null");
 		Preconditions.checkNotNull(noteId, "Note Id Is Null");
@@ -439,7 +444,7 @@ public class NoteController {
 		response.setMessage(noteService.viewTrash(req.getAttribute("userId").toString(),noteId).toString());
 		response.setStatus(200);
 		
-		logger.info(RES_OUT + "View Trash Notes Ends");
+		logger.info(RES_OUT + messages.get("158"));
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

@@ -9,9 +9,10 @@ import org.springframework.stereotype.Component;
 import com.bridgelabz.todoapplication.userservice.model.User;
 
 /**
- * @author sameer
- * @since 19/07/2018
- *
+ * Purpose : Configuration class for Redis.	
+ * @author Sameer Saurabh
+ * @version  1.0
+ * @Since  19/07/2018
  */
 @Configuration
 @Component
